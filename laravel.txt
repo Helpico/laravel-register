@@ -1,0 +1,2016 @@
+﻿
+	--------------------
+	QUEUES CREATING
+	-------------------
+
+php artisan queue: table
+	creating table in DB form queues
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	--------------
+	TAILWIND-LARAVEL SETUP
+	--------------
+   
+npm install (if not done previousely) 
+
+npm install -D tailwindcss
+
+npx tailwindcss init
+
+add this to tailwind.config.js:
+
+purge: [
+    './storage/framework/views/*.php',
+    './resources/**/*.blade.php',
+    './resources/**/*.js',
+    './resources/**/*.jsx',
+  ],
+
+() add this to resources/css/app.css file:
+
+	@tailwind base;
+	@tailwind components;
+	@tailwind utilities;
+
+() add this to webpack.mix.js
+
+	mix.js('resources/js/app.js', 'public/js')
+    	.postCss('resources/css/app.css', 'public/css', [
+        	require('tailwindcss'),
+    	]);
+
+(N8) optional (ADDING SCSS):
+
+       mix.js('resources/js/app.js', 'public/js')
+    	.sass('resources/sass/app.sass', 'public/css')
+	  options:({
+        	processCssUrls:false,
+		postCss:[require('tailwindcss')],
+    	});
+
+
+
+() get rid of the crap in welcome.blade.php adding:
+   <link ... href="{{ mix('css/app.css') }}"
+
+() add <div class =""></div>
+
+() npm run dev (maybe several times until no questions...)
+
+() add some tailwind markup and npm run div and reload the page
+
+() npm run watch (refresh as we go)
+
+
+
+MIX_APP_HOST=yeda-project.test  
+
+<sass module N8 above>
+options:({
+        	processCssUrls:false,
+		postCss:[require('tailwindcss')],
+}).browserSync({
+	proxy: process.env.MIX_APP_HOST,
+	host: process.env.MIX_APP_HOST,
+	open: "external",
+	watchOptions: {
+		ignored: /node_modules/
+	}
+});
+
+Also you can use another url: 
+
+.browerSync('127.0.0.1:8000');
+.browserSync({
+	proxy: '127.0.0.1:8000',
+	watchOptions: {
+	   ignored: /node_modules/,
+	},
+});
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	--------------
+           CREATE CONTACT FORM L8
+	--------------
+
+() php artisan make:controller ContactController
+
+() php artisan make:mail ContactMail
+
+() in .env file:
+				MAIL_MAILER=smtp
+				MAIL_HOST=smtp.googlemail.com
+				MAIL_PORT=465
+				MAIL_USERNAME=functionnel.com@gmail.com
+ 				MAIL_PASSWORD=Vualia2020
+				MAIL_ENCRYPTION=ssl
+				MAIL_FROM_ADDRESS=functionnel.com@gmail.com
+				MAIL_FROM_NAME="${APP_NAME}"
+
+() create a contact function inside ContactController
+	public function contact() 
+	{
+		return view('contact-us');
+	}
+
+
+
+() in routes/web.php add this:
+
+	- use App\Http\Controllers\ContactController;
+	- Route::get('/contact-us', [ContactController::class, 'contact']);
+ 
+
+
+() create a view contact-us.blade.php, insert tailwind markup into it.
+
+
+
+() Write this into the 'contact-us.blade.php:
+		<form method="POST" action="" enctype="multipart/form-data">
+		@csrf
+
+
+
+() go to localhost/constact-us to see the result
+
+
+
+
+() in ContactController add:
+	- use App\Mail\ContactMail;
+	- use Mail;
+
+
+
+() in ContactController add new function:
+public function sendEmail(Request $request)
+    {
+        $details = [
+            'first_name' => $request->first_name,
+            'email' => $request->email,
+            'msg' => $request->msg
+        ];
+
+        Mail::to('functionnel.com@gmail.com')->send(new ContactMail($details));
+        return back()->with('message_sent', 'Your message has been sent successfully!');
+    }
+
+
+
+
+() in the blade before <form...
+
+	@if(Session::has('message_sent'))
+		<div class="some alert class here" role="alert">
+	   	{{Session::get('message_sent')}}
+	@endif
+
+
+
+() routes/web.php add a new route
+	
+	Route::post('/send-message', [ContactController::class, 'sendEmail'])->name('contact.send');
+
+
+
+() go to blade and add named route to the form's action:
+
+	action="{{ route('contact.send') }}"
+
+
+
+() in app/Mail/ContactMail.php add this:
+public $details; (before first function)
+
+-- to build function:
+return $this->subject('Contact Message')->view('emails.ContactMail');
+
+-- to __construct function:
+$this->details = $details;
+
+
+
+() create a new folder in views called 'emails'
+
+() inside of it create a file ContactMail.blade.php
+
+() add this to this file:
+  <h1>Contact Message</h1>
+  <p>Name : {{$details['first_name']}}</p>
+  <p>Email : {{$details['email']}}</p>
+  <p>Message : {{$details['msg']}}</p>
+
+
+	 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+---------------------------
+\\\\\\\\\\\\\\\\\\\ STEPS
+---------------------------
+
+--------------
+INSTALL LARAVEL
+--------------
+
+1. composer create-project laravel/laravel folderName
+2. cd folderName
+3. php artisan serve
+
+
+------------------
+RUN LARAVEL LOCALLY
+------------------>
+
+##Mac Os, Ubuntu and windows users continue here:
+
+Create a database locally named homestead utf8_general_ci
+Download composer https://getcomposer.org/download/
+Pull Laravel/php project from git provider.
+Rename .env.example file to .env inside your project root and fill the database information. 
+(windows wont let you do it, so you have to open your console cd 
+your project root directory and run mv .env.example .env )
+Open the console and cd your project root directory
+Run composer install or php composer.phar install
+
+Run php artisan key:generate
+
+config/database.php
+убрать пароль, нужно что б было '', если у тебя без пароля
+
+php artisan cache:clear
+что б не выдавало ошибку "Illuminate\Database\QueryException" после php artisan migrate
+
+Add this to the top of AppServiceProvider.php file
+use Illuminate\Support\Facades\Schema;
+
+Add this to 'boot' function inside AppServiceProvider.php
+'Schema::defaultStringLength(191);' 
+
+Run php artisan migrate
+Run php artisan db:seed to run seeders, if any.
+Run php artisan serve
+
+THAT'S ALL!
+
+If for some reason your project stop working do these:
+composer install
+php artisan migrate
+............<
+
+
+
+-------------------
+PULL LARAVEL FROM REMOTE REPO
+--------------------
+
+download project from remote repo by git pull origin master
+change path in XAMPP to htdocs/public/
+in local folder - composer update
+copy .htaccesss and .env files from hosting
+change .env file (=localhost etc.)
+
+
+
+--------------
+DEPLOYMENT
+---------------
+
+!!! DEPLOYMENT to Hosting Ukraine
+https://www.youtube.com/watch?v=d-99IlvUuJw
+
+0. Create the database on remote server.
+--- create db on remote server
+--- export and save dump of local database with extenstion .sql
+--- import this local database to remote server
+
+
+1. In .env file:
+--- change APP_NAME=LanguageIntellect
+--- APP_DEBUG=true (remain intill the production)
+--- APP_URL=http://languageintellect.com
+--- поменять значения подключения к базе данных в т.ч. порт поменять на 3306 (раньше был 8889)
+DB_CONNECTION=mysql
+DB_HOST=mova02.mysql.tools
+DB_PORT=3306
+DB_DATABASE=mova02_languageintellect
+DB_USERNAME=mova02_languageintellect
+DB_PASSWORD=56Zbp#v4R+
+
+--- генерируем ключ в локальной папке проекта: php artisan key:generate
+--- очищаем кэш php artisan config:cache
+--- (опционно) composer dump-autoload -o (In my case, the problem was with the autoloader loading old deleted files so I just used " composer dump-autoload -o " and it worked)
+--- в папке public/.htaccess убрать флаг -MultiViews
+--- в папке public/.htaccess в самом вверху пишем, указывая путь к индекс файлу DirectoryIndex public/index.php
+--- в папке public/.htaccess где то в низу изменяем на:  RewriteRule ^ public/index.php [L]
+--- перемещаем файл .htaccess выше на уровень от в public (кладем в корневой каталог) (ГОВОРЯТ, ЧТО ЭТО НЕ НУЖНО ДЕЛАТЬ. ПУСТЬ ОСТАЕТСЯ В ПАБЛИКЕ И ДВА ПРЕДЫДУЩИХ ДЕЙСТВИЯ В ЭТОМ СПИСКЕ ОТМЕНИ)
+--- делаем git add . git commit... git push origin master
+--- всю папку проекта целиком копируем в папку www (предварительно полностью очистив папку www)
+--- извлекаем все содержимое папки проекта в папку www
+--- меняем в настройках конкретного сайта в php.ini версию на ту, которую требует Ларавел
+--- (опционно) заходим в папку storage/framework/sessions и удаляем все сессии
+--- заходим в папку storage/logs и удаляем все логи, включая .gitignore
+--- заходим в папку bootstrap/cache и удаляем файл config (ЭТО ЖЕ МОЖНО СДЕЛАТЬ КОММАНДОЙ: php artisan config:clear)
+--- (опционно) By running php artisan view:clear you simply clear out all the cached views, and so next time the blade view is loaded it will be compiled again rather than pulling it from the cache.
+
+
+На хостинге в консоли стоит версия php 5.6. Что бы работать c php artisan, нужна версия php >=7.3.0. 
+Поменять временно версию php в консоли можно так: export PATH=/usr/local/php74/bin:$PATH . C компоузером можно работать и стол старой версией php. 
+
+php artisan key:generate  Will make all sessions invalid because a new application key is specified
+
+-----------<
+
+
+---------------------------------
+Moving Laravel to shared hosting
+--------------------------------->
+Так зручно робити, коли ми раніше виконали Деплоймент, що вгорі, а потім з гітхабу переносимо на сервер.
+
+0. 
+Make sure that composer is install on your shared hosting
+
+1. Coppy all local Laravel's project files, accept for 'vendor' to a 'lara' folder (do it with Norton Commander)
+ 
+2. $ scp -r ./lara mova02@mova02.ftp.tools:/home/mova02/languageintellect.com
+Copy this new folder to a shared hosting (must not include 'vendor')
+
+3. rm -rf ./*       rm -r ./* (check ls -a) 
+Delete the content of 'laravel' folder, including hidden files
+
+3.5 CD .. 
+Go to directory where 'lara' & 'laravel' folders are sitting
+
+4. mv {lara/*,lara/.*} laravel/
+Move all files inside 'lara' folder to a 'laravel' folder, INCLUDING HIDDEN FILES
+
+5. PATH=/usr/local/php74/bin:$PATH
+Временно меняем в консоли старую версию php на нужную для Composer install
+
+5.5 CD into 'laravel' directory
+
+6. composer install
+Подгружаем все технические файли фреймверка Ларавел.
+
+7. В настройках хостинга прописываем домашнюю директорю не WWW, a www/public
+
+8. Меняем настройки на удоленный, но дебагинг пока оставляем:
+
+PP_NAME="Language Intellect"
+APP_ENV=production
+APP_KEY=base64:I1YWsxWxjAT+ha7ljVTvNr2tHuZWCzMUnCJB8ShB6ts=
+APP_DEBUG=true
+APP_URL=http://languageintellect.com
+
+LOG_CHANNEL=stack
+LOG_LEVEL=debug
+
+DB_CONNECTION=mysql
+DB_HOST=mova02.mysql.tools
+DB_PORT=3306
+DB_DATABASE=mova02_languageintellect
+DB_USERNAME=mova02_languageintellect
+DB_PASSWORD=*********
+
+
+9. Импортируем базы данных
+
+10. Must be working now!
+
+
+------------------------------------<
+
+
+
+--------------
+AUTH  						Should be installed right after the Laravel installation
+--------------
+
+composer require laravel/ui
+Installing auth simple auth module
+
+php artisan ui bootstrap
+Enable bootstrap in Laravel (bootstrap --auth would be enough if only for auth)
+
+php artisan ui bootstrap --auth
+Bootstrap scaffolding for authontication
+
+npm install && npm run dev
+It compiles your fresh scaffolding.
+
+php artisan migrate
+To create a default Laravel tables for users and passwords
+
+
+---------------------------------------
+CONFIGURATOIN FOR PRODUCTION
+---------------------------------------
+
+--- Configure the database in the .env file.
+
+		APP_NAME=Helpica
+		APP_ENV=local
+		APP_KEY=base64:9Z0EciiLu7Jeh6R2HXUi7Q49r3s+NEJKbA4Y0TyTfw0=
+		APP_DEBUG=true
+		APP_URL=d:\OSPanel\domains\helpica
+
+		LOG_CHANNEL=stack
+
+		DB_CONNECTION=mysql
+		DB_HOST=127.0.0.1
+		DB_PORT=3306
+		DB_DATABASE=mova02_helpica
+		DB_USERNAME=root
+		DB_PASSWORD=
+
+
+--- Configure app\config.php file.
+
+	'name' => env('APP_NAME', 'Helpica'),
+	'env' => env('APP_ENV', 'local'),
+	'debug' => env('APP_DEBUG', true),
+	'url' => env('APP_URL', 'd:\OSPanel\domains\helpica'),
+	'timezone' => 'UTC',
+	'locale' => 'en',
+	'fallback_locale' => 'en',
+
+for production:
+
+	'name' => env('APP_NAME', 'Helpica'),
+	'env' => env('APP_ENV', 'production'),
+	'debug' => env('APP_DEBUG', false),
+	'url' => env('APP_URL', 'd:\OSPanel\domains\helpica'),
+	'timezone' => 'UTC',
+	'locale' => 'en',
+	'fallback_locale' => 'en',
+
+
+
+---------------------------
+СТВОРИВ МОДЕЛЬ, КОНТРОЛЕР ТА МІГРАЦІЮ
+---------------------------
+
+php artisan make:model Task -c -m
+
+
+-----------------------------------
+SET UP CONFIGURATION FOR DB
+-----------------------------------
+
+Правильне підключення в config/databases.php:
+
+'connections' => [
+
+        'mysql' => [
+            'driver'    => 'mysql',
+            'host'      => env('DB_HOST', 'localhost'),
+            'database'  => env('DB_DATABASE', 'my-existing-db'),
+            'username'  => env('DB_USERNAME', 'root'),
+            'password'  => env('DB_PASSWORD', 'root'),
+            'charset'   => 'utf8',
+            'collation' => 'utf8_unicode_ci',
+            'prefix'    => '',
+            'strict'    => false,
+        ],
+
+    ],
+
+
+---------------------------
+CHECK IF CONNECTED TO DB
+---------------------------
+
+use Illuminate\Database\Connection;
+
+Route::get('/', function () {
+
+    // Test database connection
+    try {
+        DB::connection()->getPdo();
+        echo "Connected successfully to: " . DB::connection()->getDatabaseName();
+    } catch (\Exception $e) {
+        die("Could not connect to the database. Please check your configuration. error:" . $e );
+    }
+
+    return view('welcome'); // optional
+});
+
+
+
+---------------------------------------------
+Переніс вказані файли зі старого сайту в новий
+---------------------------------------------
+
+  Скопіював зміст таблиці зі старого сайту в новий
+  INSERT INTO `mova02_languageintellect`.`tasks` SELECT * FROM `mova02_helpica`.`tasks`
+
+
+---------------------------------------------
+ADD w3.css to admin panel
+---------------------------------------------
+
+  copy w3.css to /public/css/ folder
+
+
+-------------------------------------
+Change application name in .env file
+------------------------------------
+
+APP_NAME="Language Intellect"
+
+
+--------------------------------------
+I don't understand why I did this		https://www.positronx.io/how-to-properly-install-and-use-bootstrap-in-laravel/
+--------------------------------------
+
+npm install && npm run dev
+
+
+--------------------------------------
+После  доплоя все ще оставить дебагинг
+--------------------------------------
+заходить в админку по ссылке site.com/admin после того как я дома ОС переустановил =) выдает ошибку 500. 
+1) Включите в .env APP_DEBUG=true Должно выводить подробности ошибки на экран (500 - ни о чем не говорит).
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Basically the Modal deals with database.
+The Vew is the users interface that dispays in the browser.
+The Controler handles request which come from eithet URL or forms, post requests, delete it and so on.
+
+1. В моделях мы используем статические методы. 
+2. Файлы с классами моделей вкладываем в файлы в папке controllers.
+3. Вкладки делаются так: include_once(ROOT.'/models/News.php');
+
+
+
+-------------------------------
+xampl 32 bit windows 10 php 7.3
+-------------------------------
+
+Если скачать более низкую версии пхп, тогда ларавель загрузит старую версию себя. 8 ларавель загружается при 7.3 и выше.
+Если нужно что-то распаковать, тогда обычно кладут архив в темп папку и там делают все необходимые операции. 
+
+
+
+
+
+
+
+
+
+Треба мати бібліотеку фейкерів.
+Під час першої міграції Ларавель може сваритися.
+Щоб цього не було, треба перед такою міграцією
+видалити зайві таблиці. А першу таблицю Юзер
+мабуть треба мігрувати разом з першою її залежністю.
+
+
+
+----------------------------
+new tips
+---------------------------
+
+- return view('pages.index')->with('post', $post); 'POST' here is how we will be calling the variable $post inside the view.
+- ми можемо передавати у вью ассоціативний ерей, в якому ключі стануть змінними у вьюшках: 
+  $data = array($title => 'Services', 'services' => ["Desine", "Markup", "Code]);
+  return view('pages.index')->with($title); А потім вставляти у вьюшці {{$title}}? , а якщо вставляемо ерей, тоді робимо його луп у вьюшці: if(count($services) <ul> @foreach($services as $service) <li>$service</li> @endforeach </ul>
+- <script> var test = '{{ $var }}'; </script> (передача данных из Ларавел в ДжС). Правильный способ передачи маршрутов здесь: https://www.youtube.com/watch?v=p76NKmeEuHs
+
+
+------------------------------
+ОТДЕЛЬНЫЙ МОДУЛЬ В СТРУКТУРЕ ЛАРАВЕЛ https://www.youtube.com/watch?v=nkNpEDAF0iQ
+------------------------------
+
+1. In 'app' folder we create 'Modules' folder. Inside of it: we create two folders - 'Admin' and 'Public'. Inside of Admin we create the folder of our module: 'Worder'. Inside of it we create three folders: Controllers, Modeles, Routes.
+2. In Routes we create web.php.
+3. We create a model from maind project directory: php artisan make:model Modules/Admin/Worder/Models/Worder   (where Worder is the name of our model)
+4. Увага! Когда We create a controller: (ТАК НЕ ПРОЙДЕТ) php artisan make:model Modules/Admin/Worder/Controllers/WorderController --resource создается в директории http а мы хотим в модулях, поэтому создаем файл вручную
+5. Вручную создаем в папаке Контроллеры файл WorderController.php namespace App/Modules/Admin/Worder/Controllers; class WorderControllers { 	public function index() {	dd('hello');	}	}
+6. Прописываем путь в route Route::group(['prefix' => 'worders'], function() { // We can add Middleware new prefix. 	Route::get('/', 'WorderController@index')->name('worders.index'); }); 
+7. В папке config создаем файл modular.php где прописываем путь к маршруту, ведь сейчас Ларавел ищет наш модульный маршрут в центральном веб.пхп а его там нет.
+
+
+
+
+
+
+Laravel 5.8 Tutorial From Scratch - e31 - Deployment: Basic Server Setup - SSH, UFW, Nginx - Part 1
+https://www.youtube.com/watch?v=VopxsIHrJH4
+
+Full-fledged 4-hour course of Laravel
+https://www.youtube.com/watch?v=ImtZ5yENzgE
+
+UPDATE table_name SET column_nane = Null;
+UPDATE table_name SET column_nane = Null WHERE field_name = Condition;
+
+
+DKR Вывод меню на странице. Отношение многие к многим.
+https://www.youtube.com/watch?v=mN15LtMy38I&feature=push-prem&attr_tag=0nsF5bYv-A9L2EVd%3A6
+
+Платный курс!!! Фреймворк Laravel с Нуля до Профи. Быстрая разработка с 
+https://www.youtube.com/watch?v=bn1-NMYX7jo&list=PL9ogRqeIEMzntnGiOj0tHu0o2ldxWWtJR
+
+Слайды ОСНОВЫ ЛАРАВЕЛЬ. САМЫЕ
+https://www.dropbox.com/s/k6vi6xu491slcsf/Фреймворк%20Laravel%20быстрый%20старт%20для%20PHP-разработчика.pdf
+
+Создание сайта из копии, но на другом языке
+https://laravel.ru/posts/1007
+
+Laravel 5.7. Basic changes/
+https://www.youtube.com/watch?v=9hgvuFnLU0c&feature=push-u-sub&attr_tag=IgyzKSOQ_W1lwrhL%3A6
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+LARACAST GREAT SERIES ON LARAVEL. see all the lessons, not just this one on pivot table.
+https://www.youtube.com/watch?v=7s0kzx4IxCA
+
+
+Отношения один ко многим
+https://www.youtube.com/watch?v=WtIgnK42mvc&feature=push-u&attr_tag=LrmlelkJ_LwCYOJH-6
+
+
+
+
+The simple deployment
+https://medium.com/laravel-news/the-simple-guide-to-deploy-laravel-5-application-on-shared-hosting-1a8d0aee923e
+
+
+links:
+0 Two .htaccess files should be created.
+https://ru.stackoverflow.com/questions/695077/Как-перенести-проект-на-laravel-на-хостинг
+https://ru.stackoverflow.com/questions/463385/Как-перенести-laravel-на-хостинг?rq=1
+https://ru.stackoverflow.com/questions/479992/laravel-5-настройка-путь-к-public?rq=1
+
+
+1. Text guide
+https://medium.com/laravel-news/the-simple-guide-to-deploy-laravel-5-application-on-shared-hosting-1a8d0aee923e
+
+2. Traversy Media
+https://www.google.com.ua/url?sa=t&rct=j&q=&esrc=s&source=web&cd=1&cad=rja&uact=8&ved=0ahUKEwih8Ir3iM3aAhVHjSwKHS3aDYkQtwIIJjAA&url=https%3A%2F%2Fwww.youtube.com%2Fwatch%3Fv%3D6g8G3YQtQt4&usg=AOvVaw1FPnv2IqSKPUit7wYf1nqr
+
+3. Как установить Laravel на обычный хостинг-сервер?
+https://toster.ru/q/384643
+https://toster.ru/q/328567
+
+Гару: Загрузка проекта Laravel на веб-сервер
+3.1 http://qaru.site/questions/136922/uploading-laravel-project-onto-web-server
+
+3.2. Как перенести Ларавел на сервер?
+
+Если вы всё делали по общепринятым стандартам, то 
+для того, чтобы развернуть проект, вам понадобится залить 
+его файлы на хостинг, подключиться по SSH и сделать тот же 
+composer install (если это продакшен, то с генерацией 
+оптимизированного автолоадера и без dev-пакетов - см. мануал 
+от Symfony). 
+Плюс, у Laravel есть такая штука как Rocketeer для деплоя приложений - можете воспользоваться им. 
+
+Если используете Git, то:
+1. подключаетесь к серверу через SSH (с начало настраиваете подключения по SSH);
+2. Клонируете проект (из репозиторий);
+3. Выполняете composer install (конечно composer тоже должно быть установленным);
+4. Выполняете миграцию php artisan migrate;
+5. Наслаждаетесь!
+
+
+
+1. Export-import of database.
+2. Create a folder 'helpica' near 'www'.
+3. Copy all the files there, except the file of 'public'.
+4. Copy the file of 'public' folder to 'www'.
+5. Change the index.php, adding the name of created folder.
+	require __DIR__.'/helpica/vendor/autoload.php';
+	$app = require_once __DIR__.'/helpica/bootstrap/app.php';
+6. Open the .env file and change its settings.
+7. You may need to change .htaccess file's settings.
+	
+	<IfModule mod_rewrite.c>
+    
+		<IfModule mod_negotiation.c>
+
+			# Options +FollowSymLinks
+    
+		</IfModule>
+
+	
+			RewriteEngine On
+
+	
+			RewriteCond %{REQUEST_FILENAME} !-d
+	
+			RewriteCond %{REQUEST_FILENAME} !-f
+	
+			RewriteRule ^ index.php [L]
+	
+</IfModule>
+8. Change seetings on Server's site - choose PHP versiion as 7.1.
+9. Make sure cacher in the boostrap folder has 777 permission. (After installing Laravel, you may need to configure some permissions. Directories within the storage and the bootstrap/cache directories should be writable by your web server or Laravel will not run. If you are using the Homestead virtual machine, these permissions should already be set.)
+	$ cd laravel
+	$ chmod -R 777 ./storage ./bootstrap
+
+9.5 В .home/laravel/server.php изменил в путях public на public_html.
+
+Is 777 safe (to fix a server error 500).
+
+You should be able to safely set it to 700 for all of the directories, and 600 for all of the files in those directories. 744/644 would also work and be secure enough, but if you have ownership set up correctly you can completely prevent all access to any other user, which is the most secure option.
+
+
+10. Mmake sure storage folder in your root laravel project folder has 777 permission.
+	You can do it through PuTTy, enter cd helpica.me and then: $ chmod -R o+w project/storage
+11. Install composer 
+	https://www.ukraine.com.ua/faq/#rabota-s-frejmvorkami-frameworks|ustanovka-composer
+
+12. 	$ php composer install
+	$ php composer dumpautoload -o
+	$ php artisan config:cache
+	$ php artisan route:cache
+
+				composer dump-autoload; 
+    				(иногда - compower update)
+
+
+13. В .home/laravel/server.php изменил в путях public на public_html.
+У випадку хелпіки: require_once __DIR__.'/www/index.php';
+
+
+14. В bootstrap in file app.php замінив
+
+$app = new Illuminate\Foundation\Application(
+    realpath(__DIR__.'/../')
+на
+$app = new Illuminate\Foundation\Application(
+    realpath(__DIR__.'/helpica/')
+
+
+15. Відновлення прав доступу у панелі Провайдера "Технічна перевірка".
+
+16. Никогда не оставляйте параметр app.debug со значением true в продакшне
+
+17. .htaccess для сайта на сервере, полностью схожего по структуре папок с локальным.
+
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteRule ^(.*)$ public/$1 [L]
+</IfModule>
+
+Редирект с public_html на public_html/public, чтобы корректно работала подгрузка скриптов, стилей и т.д. и т.п.
+
+<IfModule mod_rewrite.c>
+RewriteEngine on
+RewriteRule ^(.*)$ public_html/public/$1 [L]
+</IfModule>
+
+
+
+
+
+
+
+1. Работа на локальном сервере + git
+2. на dev-сервере git pull + миграции и прочее (если надо), composer update
+лениво ходить по ssh? берем любой деплойер, хоть тот же envoy https://laravel.com/docs/5.2/envoy
+не нравится он, есть много других
+В итоге, запуск одной команды в консоли и все готово, если все верно настроил, конечно )
+Так же можно задействовать хуки от github. Короче выбор есть.
+
+
+-----------------------------------------
+
+database.php
+'mysql' => [
+            'driver' => 'mysql',
+            'host' => env('DB_HOST', '127.0.0.1'),
+            'port' => env('DB_PORT', '3306'),
+            'database' => env('DB_DATABASE', 'forge'),
+            'username' => env('DB_USERNAME', 'forge'),
+            'password' => env('DB_PASSWORD', ''),
+            'unix_socket' => env('DB_SOCKET', ''),
+            'charset' => 'utf8mb4',
+            'collation' => 'utf8mb4_unicode_ci',
+            'prefix' => '',
+            'strict' => true,
+            'engine' => null,
+        ],
+порт сменил с 80 на 3306 и
+SELECT user, host FROM mysql.user
+
+-----------------------------------------------------
+
+
+
+однако надо понимать, что на шару надо выгружать настроенный и рабочий продакшен, работать (вести разработку) с ним нельзя, только использовать как продакшен.
+и есть вероятность что хостинг порезан на много процентов геморроя.
+
+в AppServiceProvider 
+public function register()
+{
+        $this->app->bind('path.public', function() {
+          return base_path('/public_html');
+        });
+}
+
+---------------------------------------------------------
+
+ВОПРОС:
+Добрый день!
+Содержимое проекта Laravel выгрузил в папку /var/www/html
+Прописал в корне в файле .htaccess, как было написано выше. Но в браузере отображается структура сайта.
+Как ещё его заставить по умолчанию подгружать данные из папки public
+
+ОТВЕТ:
+Нужно настроить алиас на /public в конфиге сервера
+
+------------------------------------------------------------
+
+ВОПРОС:
+Здраствуйте! 
+Структура ftp на хостинге имеет вид
+.home/public_ftp
+.home/public_html
+и тд
+В папке "public_html" находится index.php - с чего запускается сайт. 
+Я создал папку .home/laravel и переместил туда все свое приложение laravel, кроме папки public. Содержимое папки public же я переместил в .home/public_html. 
+В .home/public_html/index.php отредактировал пути:
+require __DIR__.'/../laravel/bootstrap/autoload.php';
+$app = require_once __DIR__.'/../laravel/bootstrap/app.php';
+В .home/laravel/server.php изменил в путях public на public_html.
+Но результата никакого, пустая страница. 
+Подскажите, пожалуйста.
+
+ОТВЕТ:
+Попробуй перенести сайт в public_html полностью включая папку public, не перенося ее в корень.
+После чего в папке public_html создай файл .htaccess если он не создан, если создан, то допиши в нем:
+<IfModule mod_rewrite.c>
+RewriteEngine on
+RewriteCond %{REQUEST_URI} !^public
+RewriteRule ^(.*)$ public/$1 [L]
+</IfModule>
+
+---------------------------------------------------
+
+ВОПРОС:
+Вообще, было бы круто если бы кто то написал подробную статью по правильной настройки сервера, с разъяснениями почему так правильно,а вот так нет. А то все отправляют в гугл, а в гугле большенство статей показывают настройку на var/www/html с chmod 777...
+
+ОТВЕТ:
+Это какой-то неправильный "гугл". В чём трудности с пониманием прав? Грубо говоря, с точки зрения кода сайта есть доступ "всем на всё", есть "только веб-серверу на чтение и запись", есть "только серверу на чтение" и есть "никому". Первое и четвёртое внутри корня сайта не даётся никогда, второе только для папок, куда код действительно должен писать (логи, аватары и прочее), третье даётся по умолчанию всем файлам и папкам внутри корня - там, где лежит этот самый код и его данные (стили, элементы дизайна и прочее).
+Я как-то писал два детальных поста на эту тему, почитайте:
+https://laravel.ru/forum/viewtopic.php?pid=11718#p11718 (и пост за ним)
+
+----------------------------------------------------
+
+ВОПРОС:
+Если я разверну проект локально и скопирую файлы на shared-хостинг, то не будет он «ругаться» при работе на shared-хосинге в будущем?
+
+ОТВЕТ:
+Вам как минимум придётся донастраивать Laravel, чтобы перенести папку public (с CSS и т.п.) внутрь корня проекта, где лежит код фреймворка. К тому же наверняка будут проблемы с какими-то модулями для PHP, которых на вашем хостинге нет и доустановить их нельзя.
+Laravel, да и любой современный фреймворк лучше всего использовать, имея полный контроль над сервером. Учитывая сегодняшние цены на VPS и бесплатные панели (типа ISPManager) — нет смысла больше использовать shared, так как он по цене даже дороже у некоторых компаний (какая за этим стоит логика для меня загадка).
+
+
+---------------------------------------------------------
+
+Далее надо выполнить две вещи в корне проекта
+cp .env/example .env
+/opt/php7.1/bin/php artisan key:generate
+#выставить права, как указано ниже.
+chmod 755 laravel_app/ 
+chmod 755 laravel_app/public/
+chmod 644 laravel_app/public/index.php 
+chmod -R 777 laravel_app/storage 
+chmod -R 777 laravel_app/bootstrap/cache 
+#После этого Лара заработает.
+
+--------------------------------------------------
+
+My procedure for installing Laravel 5 on shared hosting with Apache and cpanel
+
+1. connect to hosting via SSH
+2. install composer
+3. in cpanel open Select PHP version and choose 5.4. (I also set phar extension)
+4. install laravel: php composer.phar create-project laravel/laravel myproject --prefer-dist
+5. copy everything from myproject/public to public_html
+6. open public_html/index.php and set:
+require DIR.'/../myproject/bootstrap/autoload.php';
+$app = require_once DIR.'/../myproject/bootstrap/start.php';
+and put this on top:
+ini_set('eaccelerator.enable', 0);
+
+
+
+
+
+
+---------------------------------------------------
+---------------------------------------------------
+
+===
+One to Many relationships
+===
+
+--- Получить модель позьзователя с вложеными связями 
+
+	$user = User::find(1)->load('orders');
+
+
+--- !Получить коллекцию из всех заказов опред. пользователя
+
+	$orders = User::find(1)->orders;
+
+
+--------------------------------
+SHORT TRICKS
+--------------------------------
+
+--- think globally! 'Created_at' and 'Updated_at' лучше указывать в $now = utc: \Carbon\Carbon::now('utc')->toDateTimeString();
+
+--- the difference between save and create is that save accepts a full Eloquent model instance while create accepts a plain PHP array:
+
+--- restore a particular soft deleted record: App\Hist::withTrashed()->findOrFail(3)->restore();
+
+--- restore all soft deleted records: App\Hist::onlyTrashed()->restore();
+
+--- $get_all_soft_deleted = App\Hist::onlyTrashed()->get(); $get_specific_soft_deleted = App\Hist::onlyTrashed()->where('level', 1)->get();
+
+--- view:clear Artisan command: After updating the logic of a Blade directive, you will need to delete all of the cached Blade views. The cached Blade views may be removed using the view:clear Artisan command.
+
+--- with() применяється к классу, напр.: App\User::with('orders') load() - применяетс к переменной, к переменной-аргументу
+
+--- методы отношений между моделями, напр.: user() и orders() ((one to many) в скрипте мы ИСПЛЬЗУЕМ КАК КСВОЙСТВА МОДЕЛЛИ, напр.: $orders = App\User::find(1)->orders; или: $order->user->email
+
+--- Seed classes probably should follow some sensible convention, such as UsersTableSeeder
+
+--- Зайти в терминал MySQL из сmd можна так: mysql -u root -p   Сбросить базу: DROP DATABASE laraveldb; Создать базу: CREATE DATABASE laraveldb;
+
+--- You can pass parameters to the route(). This is what they differ {{ route('login') }} и {{ url('login') }} 
+
+--- в инклудз теги язика php не ставятся
+
+
+--- Models should be singular and “studly case” (i.e. BillingAccount) and table names should be plural and snake case (i.e. billing_accounts).
+
+
+--- Контроллер должен быть тонким. А тонких не проблема сделать несколько - все равно никакой функциональности в них быть не должно - она должна лежать в репозитории и хелпере. 
+
+
+--- дикректива @auth is and shorcut for if(Auth::check())
+
+
+--- route based on word pattern ??? Route::pattern('my_word_pattern', '^novamova@ukr.net$'); Route::get('{my_word_pattern}/...', 
+
+--- how to drop a foreign key column:   http://developed.be/2015/01/29/laravel-migrations-drop-foreign-key-column/
+
+--- With foreign keys, dropping of tables has to be in proper order if you do not want foreign key constrains. That is, child tables have to be dropped 1st and only then should be parent tables be dropped.
+
+--- To define Many-to-Many relationship, three database tables are needed: users, roles, and role_user. The role_user table is derived from the alphabetical order of the related model names, and contains the user_id and role_id columns.
+
+
+----------------
+tiner inspire
+----------------
+Simplicity is the essence of happiness. - Cedric Bledsoe
+Very little is needed to make a happy life. - Marcus Antoninus
+Computer science is no more about computers than astronomy is about telescopes. - Edsger Dijkstra
+Smile, breathe, and go slowly. - Thich Nhat Hanh
+Genius is one percent inspiration and ninety-nine percent perspiration. - Thomas Edison
+He who is contented is rich. - Laozi
+
+
+
+------------
+TINKER
+------------
+
+--- see the body of a function		app(), request(), dispatch(), info()
+
+	show factory;
+
+
+--- explains usage of helper functions 	
+
+	doc request
+
+
+--- show the code of Class, instance of Class
+
+	show App\User; 
+	show $user;
+
+
+--- find a specific user and see their attributes
+
+	App\User::where('username', 'samuel')->first();
+
+
+--- find the relationships of a user
+
+	$user = App\User::with('posts')->first();
+	$user->posts;
+
+
+---  see the count of all users 
+
+	App\User::count();
+
+
+--- show database
+	
+	DB::select('SELECT DATABASE()');
+
+
+--- see tables
+	
+	DB::select('show tables');
+
+
+--- show structure of the table
+	
+	DB::select('EXPLAIN articles');
+
+
+--- to get all columns of table:
+	
+	Schema::getColumnListing('articles');
+
+
+--- any SQL-query
+
+	DB::select('SELECT * FROM users WHERE id=2');
+
+
+--- check if there is a table
+
+	Schema::hasTable('users');
+
+
+--- check if there is a column
+
+	Schema::hasColumn('users', 'password');
+
+
+--- show indexes on the table
+
+	DB::select('SHOW INDEX FROM users');
+
+
+
+======------------------------======
+======------------------------======
+   LARAVEL 5.6 APP CREATION STEPS installation
+======------------------------======
+======------------------------======
+
+
+===
+Step 1: Configure The Laravel.
+===
+
+--- Install the Laravel by the following command.
+
+	composer create-project --prefer-dist laravel/laravel helpica  
+
+
+
+
+===
+Starting Out
+===
+
+---  create a model and migration 
+
+	php artisan make:model Issue -m
+
+
+--- define relationships in the model (if necessary)
+
+	public function sample()
+	{
+  		return $this->hasMany('issues');
+	}
+
+
+--- fill out the migration files.
+
+	public function up()
+    	{
+        Schema::create('words', function (Blueprint $table) {
+            	$table->increments('id');
+            	$table->string('en', 50);
+            	$table->string('uk', 50);
+            	$table->string('ru', 50);
+            	$table->string('translit', 50);
+            	$table->integer('wordtype_id')->unsigned();
+            	$table->text('example');
+            	$table->string('part', 30)->nullable();    				// part of speech
+            	$table->integer('index')->unique();						// fr-index
+            	$table->integer('is_new');
+            	$table->integer('is_recommended');
+            	$table->integer('status')->default(1);					// show or not to show
+            	$table->timestamps();
+            });
+	}
+    	
+
+--- run the migration.
+
+	php artisan migrate
+
+
+
+
+===
+Building Database Seeds
+===
+
+--- create seeds' classes for User and Word models
+
+	php artisan make:seeder UsersTableSeeder
+	php artisan make:seeder WordsTableSeeder
+
+--- create model factory
+
+	php artisan make:factory WordFactory --model=Word
+
+
+--- fill out the WordFactory model (insert into the file)
+
+	    'en' => $faker->word(),
+            'uk' => $faker->word(),
+            'ru' => $faker->word(),
+            'translit' => $faker->word(),
+            'wordtype_id' => $faker->randomDigit,
+            'example' => $faker->sentence(),
+            'part' => $faker->word(),  
+            'index' => $faker->unique()->randomDigit,
+            'is_new' => $faker->randomDigit,
+            'is_recommended' => $faker->randomDigit	
+
+
+--- let's create 30 users and attach a relationship to each user (WordTableSeeder.php):
+
+	public function run()
+	{
+    		factory(App\User::class, 50)->create()->each(function ($u) {
+        		$u->posts()->save(factory(App\Post::class)->make());
+    		});
+	}
+
+
+--- Make seeding all in one call within the DatabaseSeeder class
+
+	
+	public function run()
+	{
+    		$this->call([
+        		UsersTableSeeder::class,
+        		WordsTableSeeder::class
+    		]);
+	}
+
+
+--- regenerate Composer's autoloader 
+
+	composer dump-autoload
+
+
+--- run the DatabaseSeeder class or a specific seeder
+    // !!! названия таблицы пишем с большой и во множественном
+
+	php artisan db:seed
+
+   or:
+
+	php artisan db:seed --class=UsersTableSeeder
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+set up database seeds so we can have sample data to work with
+
+
+
+
+
+
+
+--- cоздал миграцию 
+
+	php artisan make:migration create_words_table --create=words
+
+
+--- заполнил модели User, Word и Order с помощью Model Factory 
+
+--- создал шаблон Factory для таблицы User, Word и Order (см. archive)
+
+--- выполнил автозаполнение Factory для таблицы User 
+
+--- скопировал таблицы articles и tasks c соседней БД:  INSERT INTO `mova02_helpica`.`tasks` SELECT * FROM `mova02_Aleksandr`.`tasks` ;
+
+	INSERT INTO `mova02_helpica`.`articles`
+	SELECT * FROM `mova02_Aleksandr`.`articles`;
+
+--- сделал миграцию таблиц
+
+--- set Eloquent Relationship of User with 'Order' model: public function orders() { return $this->hasMany('App\Order'); }
+
+--- set Eloquent Relationship of Order with 'User' model: public function user() { return $this->belongsTo('App\User'); }
+
+--- уточнил миграцию модели Order: Schema::create('ordes', function (Blueprint $table) { $table->increments('id'); $table->string('user_name', 255); $table->integer('user_id')->nullable()->index(); // по аналогии с хелпика.ми $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade')->onUpdate('cascade');$table->text('word_hits');				// массив id word and counter $table->timestamp('date')->useCurrent();$table->text('text');$table->integer('status')->default(1);$table->timestamps();
+
+--- на основе модели СРАЗУ создали миграцию, контролер и фабрику php artisan make:model --all Order
+
+--- next: deleate articles and tasks from db and import articles.sql and tasks.sql from archive
+
+--- Edit app/models/User.php and add the "fillable" array:
+
+--- next: run model factory on User model
+
+--- next: подключили таблицу юзерз в хоумконтролере:  public function index()    {     	$users = User::all();    return view('home', ['users'=>$users]); }
+
+--- next: create UserController based on User model: 		https://readouble.com/laravel/5.6/en/controllers.html
+
+	php artisan make:controller UserController --resource --model=User 
+
+
+
+
+
+
+Migration
+Schema::create('orders', function (Blueprint $table) {
+            $table->increments('id');
+            $table->string('faq', 255)->nullable();
+            $table->text('text');
+            $table->text('hits')->nullable();					// массив id word and counter
+            $table->text('subject')->nullable();
+            $table->integer('user_id')->unsigned();				
+            $table->string('img')->nullable();
+            $table->string('img_2')->nullable();
+            $table->timestamp('date')->useCurrent();
+            $table->integer('status')->default(1);
+            $table->timestamps();
+        });
+    }
+
+
+Model Order
+
+protected $table = 'orders';
+	protected $primaryKey = 'id';
+
+	// Set the Eloquent Relationship.
+	public function user() {
+		
+		return $this->belongsTo('App\User');
+
+	}
+
+
+
+Model User
+
+// Set the Eloquent Relationship.
+    public function user_words () {
+		
+		return $this->hasMany('App\UserWord');
+		
+	}
+
+
+
+HomeController
+
+$user_id = auth()->user('id');
+        $user = User::find($user_id);    
+    
+        return view('home')->with('word_hits', $user->word_hits);
+
+
+
+
+
+
+ModelFactory
+
+'user_name' => $faker->name,
+            'user_id' => App\User::pluck('id')->random(),
+            'word_hits' => $faker->words(7, false),
+            'date' => $faker->date($format = 'Y-m-d', $max = 'now'),
+            'text' => $faker->realText($maxNbChars = 200, $indexSize = 2),
+            'status' => $faker->numberBetween(1, 3)
+
+-----------------------------
+IMPORTANT LINKS
+-----------------------------
+
+Great Laracast Video on Pivot tables
+https://www.youtube.com/watch?v=7s0kzx4IxCA
+
+Just general tips on Laravel
+http://laravel-recipes.com/categories/4
+
+How to insert multiple rows from a single query using eloquent
+https://stackoverflow.com/questions/29723865/how-to-insert-multiple-rows-from-a-single-query-using-eloquent-fluent
+
+Simple Roll Permissions Tutorial
+https://www.youtube.com/watch?v=yKxR8TQrr2A
+Or this. Even Better
+https://www.youtube.com/watch?v=yKxR8TQrr2A&list=PLB4AdipoHpxaTop-jxo_G4bRGjqD0Y4n6&index=1
+
+Attaching / Detaching (Many-to-many relationships)
+https://laravel.com/docs/5.6/eloquent-relationships#updating-many-to-many-relationships
+
+Great on query builder in Laravel
+https://stackoverflow.com/questions/19325312/how-to-create-multiple-where-clause-query-using-laravel-eloquent
+
+!!!!!!!! Laravel 5.4 From Scratch
+https://laracasts.com/series/laravel-from-scratch-2017
+
+Laravel First Fundamentals. Istall and so on...
+https://laracasts.com/series/laravel-5-fundamentals/episodes/1
+
+Return User model
+https://www.laracasts.com/discuss/channels/eloquent/return-user-model
+
+Laravel 5.5: Blade IF directive 
+https://www.youtube.com/watch?v=sqxOXnBbP-k
+
+!!! THE BEST ON ELOQUNT REALTIONSHIPS
+https://quickadminpanel.com/blog/eloquent-relationships-the-ultimate-guide/
+
+SQL for Beginners: Part 3 - Database Relationships
+https://code.tutsplus.com/articles/sql-for-beginners-part-3-database-relationships--net-8561
+
+Шаблон строки-вставки в eloquent через php printf('<h1>%s <small>–%s</h1>', $post->title, $user->name);
+https://laracasts.com/discuss/channels/general-discussion/confusion-on-relationships-and-polymorphic-relationships?page=1
+
+Quick Start. Laravel generator.
+https://www.youtube.com/watch?v=9BsCC1ZJcg0&list=TLGGpLvrwPWYxKUyODAzMjAxOA
+
+Many to Many Polymorphic Ralationships
+https://laracasts.com/discuss/channels/general-discussion/how-do-i-seed-many-to-many-polymorphic-relationships?page=1
+
+Laravel Eloquent Relationships: Has Many Through (5/6)
+https://www.youtube.com/watch?v=5gXbbxW4sUU
+
+Tagging in Laravel
+https://laravel-news.com/how-to-add-tagging-to-your-laravel-app
+
+Jeffrey Way Countcil's site on GitHub
+https://github.com/JeffreyWay/council/tree/master/app
+
+View.js. Simple Tutorial.
+https://www.youtube.com/watch?v=k3yRfEw1pYk
+
+UserController. One of the best on Laravel
+https://readouble.com/laravel/5.6/en/controllers.html
+
+Loggin with Google in Laravel
+http://itsolutionstuff.com/post/laravel-5-google-oauth-authentication-using-socialite-packageexample.html
+
+Real Text Generator explanation
+http://www.redotheweb.com/2014/03/04/faker-generates-real-text.html
+
+!!! Laravel Text Tutorial: Very Simple Explanation 
+https://laravel-news.com/learn-to-use-model-factories-in-laravel-5-1
+
+GREATE, GREATE COURSES ON LARAVEL and more
+https://scotch.io/courses
+
+Generating random numbers ALL UNIQUE. $fater - a lot. 
+https://github.com/fzaninotto/Faker
+
+How to Accept Payments 
+https://laracasts.com/series/how-to-accept-payments-with-stripe
+
+Custom Blade Directive
+https://www.youtube.com/watch?v=oHpbn2wN_84&index=11&list=PLwAKR305CRO8GY3HVpXShlrXab8Cd7VT_
+
+Site for DEV professionals
+http://qaru.site/search?query=session('status')
+
+API eloquent resources
+https://www.youtube.com/watch?v=Gyr5ZMNaPbc
+
+25 best tips on Laravel
+https://habrahabr.ru/post/222453/
+
+ServicContainer, ServiceProvider and Facases
+https://www.youtube.com/watch?v=Ow0MrDTJ-Qo
+
+Tutorial on Laravel
+https://www.youtube.com/watch?v=IoSCItK1u4o&list=PLnBvgoOXZNCP2LEKmvu2W-eUkO-DYn0TL&index=8
+
+How to query user with posts in Laravel
+https://stackoverflow.com/questions/28630850/how-to-query-user-with-posts-in-laravel
+
+Иконочный Шрифт aworesome
+https://www.youtube.com/watch?v=a2jKFPRNuu4&feature=push-u&attr_tag=wvDye1NU3Zp6fGmu-6
+
+
+--------------------------
+TIPS
+--------------------------
+
+--- insert multiple rows
+
+	/**
+	* Add multiple rows to Article table.
+	* 
+	* @return
+	*/
+	public function many()
+	{
+		$now = \Carbon\Carbon::now('utc')->toDateTimeString();
+
+$data = [
+	['title'=>'First',
+    'text'=>'First text',
+    'articletype_id'=>2,
+    'status'=>1, 
+	'created_at'=>$now, 
+	'updated_at'=>$now],
+	
+	['title'=>'Second',
+    'text'=>'Second text',
+    'articletype_id'=>2,
+    'status'=>1, 
+	'created_at'=>$now, 
+	'updated_at'=>$now]
+];
+
+	Article::insert($data);	
+	
+	
+	
+
+
+--- create or update a row
+
+	When you wanna create a new row:
+	$model = App\ModelName::create($arr);
+
+	When you wanna update an exist row:
+	$model = App\ModelName::find($id);
+	$model->fill($arr);
+	
+	All fillable attributes are exist in model variable $fillable.
+
+
+
+--- add multiple rows using eloquent ORM
+
+	$now =  \Carbon\Carbon::now('utc')->toDateTimeString();
+
+	$data = [
+			['name'=>'Foo', 'created_at'=>$now, 'updated_at'=>$now],
+			['name'=>'Bar', 'created_at'=>$now, 'updated_at'=>$now],
+    			['name'=>'Baz', 'created_at'=>$now, 'updated_at'=>$now]
+	];
+
+	Model::insert($data);
+
+
+
+
+
+
+
+
+
+
+
+--- get class name of related model:
+
+	$hist = Hist::with('histable')->get()->first();
+	// get model in the format of 'App\Task' 
+	$className = get_class($hist->histable()->getRelated());
+	// get model in the format of 'Task'	
+	$baseClass = class_basename($className);
+	
+
+
+--- Completely rebuilt my database
+
+	You may also seed your database using the migrate:refresh command, which will also rollback and re-run all of your migrations. This command is useful for completely re-building your database:
+	php artisan migrate:refresh --seed
+
+
+
+--- Route Model Binding important condition
+
+	Doing so, make sure that the name in curly braces matches up the 
+	name of argument of controller's method. E.g. {task} matches
+	$task in: Route::get('/tasks/{task}', 'TaskController@show'); 
+	and in public function show(Task $task){} of TaskController. 
+	Laravel will be looking in primary key, first.
+
+--- СПОСОБИ ПЕРЕДАЧІ ЗМІННОЇ У ВИД
+
+	return view('articles.show', ['article' => $article])	
+або 
+	return view(...)->with(['articles'=>$articles]) 
+або
+	(...)->with('articles', $articles)
+або
+	route('articles.show', ['article'=>$article])
+
+	Це значить, що змінна $article буде доступна в html {{ $article }} 
+
+
+
+
+--- ПЕРЕДАЧА ОБЄКТА З КНОПКИ В АРГУМЕНТ МЕТОДА
+
+	якщо є кнопка з псевдонімом маршруту: 
+	
+		href="{{ route('articles.show', ['article'=>$article]) }}"
+
+	це значить, що в метод буде передано обєкт моделі конкретного обєкту (в т.ч. і 'id')
+
+		public function show(Article $article) {}
+
+	тепер ми можемо роботи з ним що завгодно, напр.: 
+
+		return view('articles.show', ['article'=>$article]);
+
+
+--- КАК ВЫСТРАИВАТЬ МАСШТАБИРУЕМЫЕ ПРИЛОЖЕНИЯ:
+
+	Делаем productRepozitory в котором пишем всю работу с БД
+	и productHelper, в котором пишем всю пхп логику 
+	и дальше из контроллеров только дергаем методы хелпера
+	Контроллеры должны быть максимально тонкими. Там не должно содержаться бизнес-логики.
+
+
+--- КАК ПРАВИЛЬНО УПРАВЛЯТЬ МИГРАЦИЯМИ
+
+	I usually just do it like this: for table creation migrations 
+	I use php artisan make:migration create_tablename --create=tablename
+	and for table editing migrations I use php artisan make:migration
+	add_fieldname_to_tablename --table=tablename. Instead of 
+	add I might use edit/delete/drop etc. depending on what 
+	I'm trying to accomplish. This way, you're guaranteed not to 
+	get duplicates unless you accidentally try to add duplicate 
+	fields or tables to the database - in which case it wouldn't 
+	work anyway. Hope that helps. :) 
+
+	!!! You should stop naming editation migrations anything with create, since you aren't actually creating the table.
+
+	!!! You should give different names to different migrations and that's literally everything you need.
+
+
+
+--- SEVIRE BIG PROBLEMS WITH MIGRATIONS
+
+	1. Deletae Migration tables, except two first.
+	2. Delete table in the DB.
+	3. Delete database.
+	4. Run:	php artisan cache:clear 
+		php artisan clear-compiled
+		composer dump-autoload
+		php artisan migrate:install
+		php artisan migrate:refresh
+ 
+
+
+--- КЛЮЧ В КОНФІГАРАЦІЙНОМУ ФАЙЛІ config/app.php
+
+		This line in your app.php, 'key' => env('APP_KEY', 'SomeRandomString'), is saying that the key for your application can be found in your .env file on the line APP_KEY.
+		Basically it tells Laravel to look for the key in the .env file first and if there isn't one there then to use 'SomeRandomString'.
+		When you use the php artisan key:generate it will generate the new key to your .env file and not the app.php file.
+
+		php artisan key:generate is a command that sets the APP_KEY value in your .env file. By default, this command is run following a composer create-project laravel/laravel command. If you use a version control system like git to manage your project for development, calling git push ... will push a copy of your Laravel project to wherever it is going, but will not include your .env file. Therefore, if someone clones your project using git clone ... they will have to manually enter php artisan key:generate for their app to function correctly.
+		So, TL:DR the only time you need to call php artisan key:generate is following a clone of a pre-created Laravel project.
+		Side note: If you try to run a Laravel project with your APP_KEY set to SomeRandomString (which is the default in your .env.example file, you will actually get an error: 
+		No supported encrypter found. The cipher and / or key length are invalid.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	- Delete migrations table, backup migrations folder and leave it empty. Now use package that generates migrations from database (search for it) and you are done.
+
+	- have you tried deleting the whole database, creating a new one and then simply running the migrations?
+	
+	- What I liked to do is manually delete all the tables with what ever tool you use on your device. For me I just use phpmyadmin. After that I do. php artisan migrate:install php artisan migrate:refresh
+
+	- php artisan cache:clear
+	
+	- php artisan clear-compiled
+
+--- GET UNIQUE RANDOM NUMBER					https://laracasts.com/discuss/channels/code-review/faker-not-working-properly
+
+$factory->define(App\Games::class, function (Faker\Generator $faker) {
+    return [
+        'winner_id' => $faker->unique()->randomDigit
+    ];
+});
+
+
+
+
+
+
+
+--------------------------------
+AUTH 					https://laravel.com/docs/5.6/authentication
+--------------------------------
+
+5. --- Redirecting Unauthenticated Users:
+
+	See 'Redirecting Unauthenticated Users' at https://laravel.com/docs/5.6/authentication
+
+
+4. --- Only authenticated users may enter this route:
+
+	Route::get('profile', function () {...})->middleware('auth'); // On routes.
+
+	or
+
+	public function __construct(){ $this->middleware('auth'); }  // In controllers.
+
+
+
+0. --- link 
+
+	https://www.youtube.com/watch?v=IoSCItK1u4o&list=PLnBvgoOXZNCP2LEKmvu2W-eUkO-DYn0TL&index=8
+
+
+1. --- запуск auth 
+	
+	1) php artisan make:auth
+	2) restart your Open Server
+	3) php artisan migrate
+	4) other options when failed: 
+		1. Fill register field with personal data. 
+		2. Refresh page.
+		3. Run again: php artisan make:auth
+
+
+2. --- прописать перенаправление в три файла:
+	
+	1) LoginController в папке Auth
+	2) RedirectIfAuthenticated в папке Middleware
+	3) Welcome.blade.php в папке Views
+
+
+
+3. --- Пропиши редирект после авторизации:
+
+	You can customize the post-authentication redirect location by 
+	defining a redirectTo property on the LoginController, 
+	RegisterController, and ResetPasswordController: protected $redirectTo = '/';
+
+	Next, you should modify the RedirectIfAuthenticated middleware's
+	handle method to use your new URI when redirecting the user
+
+
+
+---------------------------
+FACTORY and SEEDS
+---------------------------
+
+--- create a factory
+
+1. php artisan make:factory WordFactory --model=Word
+
+2. open file and insert the patterns: 
+	$factory->define(App\Word::class, function (Faker $faker) {
+    	return [
+        	'en' => $faker->word(),
+            'uk' => $faker->word(),
+            'ru' => $faker->word(),
+            'translit' => $faker->word(),
+            'wordtype_id' => $faker->randomDigit,
+            'example' => $faker->sentence(),
+            'part' => $faker->word(),  
+            'index' => $faker->unique()->randomNumber,
+            'is_new' => $faker->randomDigit,
+            'is_recommended' => $faker->randomDigit
+    		];
+	});
+
+3. Run in tinker (наполнить таблицу): factory('App\Word', 10)->create();
+
+factory(App\User::class, 10)->create();
+
+Якщо через сидер, тоді замість 3.
+
+3. php artisan make:seeder WordsTableSeeder
+
+4. В DatabaseSeeder прописати WordsTableSeeder::class,
+
+5. В WordsTableSeeder прописати factory(App\Word::class, 10)->create();
+
+6. composer dump-autoload
+
+7. php artisan db:seed --class=WordsTableSeeder
+
+
+
+
+$faker->unique()->randomNumber // random UNIQUE number
+'text' =>$faker->realText($maxNbChars = 200, $indexSize = 2),
+'user_id' => App\User::pluck('id')->random(),
+'user_id' => App\User::all(['id'])->random(),
+'user_id' => App\User::all()->random()->id,
+'user_id' => function() { return factory(App\User::class)->id },
+'name' => $faker->name,
+'email' => $faker->unique()->safeEmail,
+'email' => $faker->email,
+'remember_token' => str_random(10),
+'index' => $faker->unique()->randomDigit,
+'en_word' => $faker->word(),
+'wordtype_id' => $faker->randomDigit,
+'example' => $faker->sentence(),
+'text' => $faker->paragraph(rand(3, 10), true),
+'date' => $faker->date($format = 'Y-m-d', $max = 'now'),
+'password' => str_random(10),
+'status' => numberBetween(1, 3),
+'lemma_hits' =>words($nb = 3, $asText = false) 
+
+
+$table->enum('role', array('user', 'admin', 'superuser'));
+
+return [
+        'email' => $faker->unique()->safeEmail,
+        'password' => $password ?: $password = bcrypt('secret'),
+        'remember_token' => str_random(10),
+        'first_name' => $faker->firstName,
+        'last_name' => $faker->lastName,
+        'street' => $faker->streetAddress,
+        'city' => $faker->city,
+        'state_province_id' => App\StateProvince::pluck('id')->random(),
+        'zip' => $faker->postcode,
+        'country_id' => App\Country::pluck('id')->random(),
+        'timezone' => $faker->timezone,
+        'system_of_measurement_id' => App\SystemOfMeasurement::pluck('id')->random(),
+        'currency_id' => App\Currency::pluck('id')->random(),
+        'phone' => $faker->phoneNumber,
+        'language_id' => App\Language::pluck('id')->random(),
+        'image' => null
+    ];
+
+----------------------------
+ARTISAN
+----------------------------
+
+--- to clear cache of your views
+
+	php artisan view:clear
+
+
+--- to view a list of all artisan commands
+
+	php artisan list
+
+
+--- preceed command with help to see all the list of options
+	
+	php artisan help migrate or php artisan help make:migration
+
+
+--- создание миграции вместе с контролером (наполненным)
+
+	php artisan make:model --migration --controller --resource Word
+
+
+--- show all routes
+	php artisan route:list
+
+
+--- show all 'make' commands
+	php artisan list make
+
+
+
+--- refresh the artisan command, reload all the classes (quick reload with '-o' at the end)
+	composer dump-autoload
+
+
+--- make a new command
+	php artisan make:command My --command=my:goals
+
+
+
+----------------------------
+COMPOSER
+----------------------------
+
+--- Перед установкой композера﻿ Опен Сервер нужно остановить
+
+--- composer dump-autoload won’t download a thing. It just regenerates the list of all classes that need to be included in the project (autoload_classmap.php). Ideal for when you have a new class inside your project. Ideally, you execute composer dump-autoload -o , for a faster load of your webpages. 
+
+
+
+--------------------
+USEFULL COMMANDS
+--------------------
+
+
+
+--- отримати останній запис у таблиці 'users'
+	App\User::orderBy('id', 'desc')->first();
+
+--- отримати id зареєстрованого юзера
+
+	Auth::id();
+
+--- отримати обєкт зареєстрованого юзера
+
+	Auth::user();
+
+---- дізнатися КЛАС моделі за назваю колекції або таблиці
+
+	dd(get_class($articles))
+
+-----------------------------
+MIGRATIONS
+-----------------------------
+
+--- CREATE NEW TABLE
+
+php artisan make:migration create_users_table --create=users
+
+або:
+
+php artisan make:migration create_wordtype_table --create=wordtype
+
+OR:
+
+Щоб уникнути конфліктів іноді треба:
+1. Видалити старий файл міграції.
+2. Запустити: composer dump-autoload
+3. Запустити: php artisan make:migration create_articles_table --create=articles
+
+OR:
+
+go to phpmyadmin and drop the database that you created for laravel then create it again then go to cmd(if use windows) root project and type php artisan migrate
+
+
+
+
+--- ADD NEW COLUMNS
+
+1. php artisan make:migration add_column-name_to_table-name --table=table-name
+
+
+
+2. go to your project directory and expand directory database - migration and edit file add_paid_to_users.php, add this code
+
+public function up()
+{
+    Schema::table('users', function (Blueprint $table) {
+         $table->string('paid'); //just add this line
+    });
+}
+
+public function down()
+{
+    Schema::table('users', function (Blueprint $table) {
+         $table->dropColumn('paid'); 
+    });
+}
+
+2. php artisan migrate
+
+
+
+
+
+--- CREATE MODEL with MIGRATION
+
+If you would like to generate a database migration when you generate the model, you may use the --migration or -m option:
+
+php artisan make:model User --migration
+
+
+
+--- CREATE TABLE NAME OTHER FROM DEFAULT
+
+Add this to your model: protected $table = 'my_flights';
+
+
+
+----------------------------------
+MIGRATION LANGUAGE
+----------------------------------
+
+$table->increments('id');	// Auto-incrementing UNSIGNED INTEGER (primary key) equivalent column.
+$table->timestamps(); 		// Adds nullable created_at and  updated_at TIMESTAMP equivalent columns.
+$table->string('name', 100);	VARCHAR equivalent column with a optional length.
+$table->string('slug')->unique();
+$table->json('permissions')->default('{}');
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Nice text site on Laravel
+https://appdividend.com/2018/02/23/laravel-5-6-crud-tutorial/
+
+To start with Laravel 5.6
+https://appdividend.com/2018/02/23/laravel-5-6-crud-tutorial/
+
+Fragments of Book on Laravel
+https://books.google.com.ua/books?id=psVDDwAAQBAJ&pg=PA715&lpg=PA715&dq=%D1%80%D0%B5%D0%B7%D0%B5%D1%80%D0%B2%D0%BD%D0%B0%D1%8F+%D0%BA%D0%BE%D0%BF%D0%B8%D1%8F+%D0%9B%D0%B0%D1%80%D0%B0%D0%B2%D0%B5%D0%BB&source=bl&ots=NUud6YFS3R&sig=1Wbl-AR4sXIlIy2DXf5eUqIDIn8&hl=uk&sa=X&ved=0ahUKEwj6xcaxy93ZAhUDVSwKHYCxDv8Q6AEIYTAI#v=onepage&q=%D1%80%D0%B5%D0%B7%D0%B5%D1%80%D0%B2%D0%BD%D0%B0%D1%8F%20%D0%BA%D0%BE%D0%BF%D0%B8%D1%8F%20%D0%9B%D0%B0%D1%80%D0%B0%D0%B2%D0%B5%D0%BB&f=false
+
+--- Коли висне Ларавел
+
+		php artisan clear-compiled
+		php artisan config:cache
+		php artisan view:clear
+
+
+
+

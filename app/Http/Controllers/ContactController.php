@@ -18,7 +18,7 @@ class ContactController extends Controller
     
     public function sendEmail(Request $request)
     {
-
+     
         $rules = [
             'first_name' => 'required',
             'email' => 'required|email',
@@ -32,6 +32,9 @@ class ContactController extends Controller
             'email' => $request->email,
             'msg' => $request->msg
         ];
+
+      
+
 
         Mail::to('functionnel.com@gmail.com')->send(new ContactMail($details));
         
