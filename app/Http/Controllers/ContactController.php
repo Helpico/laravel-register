@@ -14,8 +14,19 @@ class ContactController extends Controller
         return view('contact-us');
     }
 
+
+    
     public function sendEmail(Request $request)
     {
+
+        $rules = [
+            'first_name' => 'required',
+            'email' => 'required|email',
+            'msg' => 'required|max:255|min:5'
+        ];
+
+        $validatedData = $this->validate($request, $rules);
+        
         $details = [
             'first_name' => $request->first_name,
             'email' => $request->email,
@@ -23,9 +34,10 @@ class ContactController extends Controller
         ];
 
         Mail::to('functionnel.com@gmail.com')->send(new ContactMail($details));
-        return back()->with('message_sent', 'Your message has been sent successfully!');
-
+        
+        return redirect()->route('contact.create')
+            ->with('message_sent', 'Thanks for contacting us!');
+        
     }
-
-
+         
 }

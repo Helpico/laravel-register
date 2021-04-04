@@ -15,7 +15,13 @@
 @if(Session::has('message_sent'))
 	<div class="text-green-500 font-bold">
 	   {{Session::get('message_sent')}}
-@endif    
+@elseif(Session::has('message_not_sent'))
+    <div class="text-red-500 fond-bold">
+        {{Session::get('message_not_sent')}}
+@endif
+
+
+
 
 <form class="space-y-4 " method="POST" action="{{ route('contact.send') }}" enctype="multipart/form-data">
 		@csrf

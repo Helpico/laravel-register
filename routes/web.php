@@ -16,7 +16,7 @@ use App\Http\Controllers\ContactController;
 
 Route::redirect('/', '/contact-us');
 
-Route::get('/contact-us', [ContactController::class, 'contact']);
+Route::get('/contact-us', [ContactController::class, 'contact'])->name('contact.create');
 Route::post('/send-message', [ContactController::class, 'sendEmail'])->name('contact.send');
 
 
