@@ -11,7 +11,6 @@ use Illuminate\Queue\SerializesModels;
 
 use Illuminate\Support\Facades\Mail;
 
-
 class BlogPostAfterCreateJob implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
@@ -19,16 +18,16 @@ class BlogPostAfterCreateJob implements ShouldQueue
     /**
      * @var BlogPost 
      */
-    private $msg;
+    private $msgObj;
 
     /**
      * Create a new job instance.
      *
      * @return void
      */
-    public function __construct($msg)
+    public function __construct($msgObj)
     {
-        $this->msg = $msg;
+        $this->msgObj = $msgObj;
     }
 
     /**
@@ -39,8 +38,8 @@ class BlogPostAfterCreateJob implements ShouldQueue
     public function handle()
     {
         
-        Mail::to('functionnel.com@gmail.com')->send($this->msg);
-        logs()->info($this->msg);
+        Mail::to('functionnel.com@gmail.com')->send($this->msgObj);
+        info($this->msgObj);
 
         
         

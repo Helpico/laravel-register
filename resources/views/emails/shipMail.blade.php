@@ -9,8 +9,8 @@
 <body>
 <h1>Сообщение от клиента</h1>
   <p>Имя клиента: {{$details['first_name']}}</p>
-  <p>Email клиента: {{$details['email']}}</p>
-  <p>Сообщение: {{$details['msg']}}</p>
+  <p>Email клиента: {{$details['email_contact']}}</p>
+  <p>Сообщение: {{$details['msg_contact']}}</p>
   <p>Быстро ответить: {{ $details['asap'] == 'on' ? 'Да, нужен быстрый ответ' : 'No, take your time!' }}</p>
 </body>
 </html>

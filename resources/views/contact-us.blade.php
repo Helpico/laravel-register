@@ -27,13 +27,13 @@
 </div>
 
 <div>
-<lable class="block mb-2 font-bold text-gray-500" for="email">Email</lable>
-<input type="text" name="email" class="outline-none focus:border-purple-500  w-full border border-gray-400 p-2">
+<lable class="block mb-2 font-bold text-gray-500" for="email_contact">Email</lable>
+<input type="text" name="email_contact" class="outline-none focus:border-purple-500  w-full border border-gray-400 p-2">
 </div>
 
 <div>
-<lable class="block mb-2 font-bold text-gray-500" for="msg">Сообщение</lable>
-<textarea name="msg" class="outline-none focus:border-purple-500 w-full border border-gray-400 p-2" cols="30" rows="2"></textarea>
+<lable class="block mb-2 font-bold text-gray-500" for="msg_contact">Сообщение</lable>
+<textarea name="msg_contact" class="outline-none focus:border-purple-500 w-full border border-gray-400 p-2" cols="30" rows="2"></textarea>
 </div>
 
 <div class="flex items-center">
