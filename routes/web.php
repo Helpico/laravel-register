@@ -14,12 +14,8 @@ use App\Http\Controllers\ContactController;
 | contains the "web" middleware group. Now create something great!
 |
 */
-// Queue's job testing
-Route::get('/', function() {
-  // App\Jobs\BlogPostAfterCreateJob::dispatch('This is the content of the msg');
-});
-
-
+// Contact Form Queue based sending
+Route::redirect('/', '/contact-us');
 Route::get('/contact-us', [ContactController::class, 'contact'])->name('contact.create');
 Route::post('/ship-message', [ContactController::class, 'shipEmail'])->name('contact.ship');
 

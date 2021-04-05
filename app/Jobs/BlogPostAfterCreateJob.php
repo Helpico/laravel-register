@@ -39,11 +39,6 @@ class BlogPostAfterCreateJob implements ShouldQueue
     {
         
         Mail::to('functionnel.com@gmail.com')->send($this->msgObj);
-        info($this->msgObj);
-
-        
-        
-        
-        // logs()->info("Contact form message initiated: [{$this->msg}]");
+        logs()->info("Contact form message initiated: [{$this->msgObj}]");
     }
 }
