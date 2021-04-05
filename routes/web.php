@@ -16,11 +16,11 @@ use App\Http\Controllers\ContactController;
 */
 // Queue's job testing
 Route::get('/', function() {
-  App\Jobs\SendMessage::dispatch('Test Message');
+  // App\Jobs\BlogPostAfterCreateJob::dispatch('This is the content of the msg');
 });
 
 
 Route::get('/contact-us', [ContactController::class, 'contact'])->name('contact.create');
-Route::post('/send-message', [ContactController::class, 'sendEmail'])->name('contact.send');
+Route::post('/ship-message', [ContactController::class, 'shipEmail'])->name('contact.ship');
 
 

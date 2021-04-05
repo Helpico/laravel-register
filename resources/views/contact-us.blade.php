@@ -18,7 +18,7 @@
 	   {{Session::get('message_sent')}}
 @endif
 
-<form class="space-y-4 " method="POST" action="{{ route('contact.send') }}" enctype="multipart/form-data">
+<form class="space-y-4 " method="POST" action="{{ route('contact.ship') }}" enctype="multipart/form-data">
 		@csrf
 
 <div>

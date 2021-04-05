@@ -3,9 +3,10 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-
 use App\Mail\MailShipped;
+use Mail;
 use App\Jobs\BlogPostAfterCreateJob;
+
 
 class ContactController extends Controller
 {
@@ -13,6 +14,7 @@ class ContactController extends Controller
     {
         return view('contact-us');
     }
+
 
     
     public function shipEmail(Request $request)
@@ -32,13 +34,15 @@ class ContactController extends Controller
                 'asap' => $request->asap
             ];
             
-            $contactFormInfo = new MailShipped($details);
 
-            $job = new BlogPostAfterCreateJob($contactFormInfo);
-            $this->dispatch($job);
+            Mail::to('functionnel.com@gmail.com')->send(new MailShipped($details));
 
             return redirect()->route('contact.create')
                 ->with('message_sent', 'Your message has been sent successfully!');
                 
     }
 }
+
+
+// $job = new BlogPostAfterCreateJob($msg);
+// $this->dispatch($job);

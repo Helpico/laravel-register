@@ -38,7 +38,7 @@
 
 - Создаем член класса, как название переменной protected $message;
 
-- В конструктор класса записываем __constructor9($data) {
+- В конструктор класса записываем __constructor($data) {
 		$this->message = $data;
 }
 

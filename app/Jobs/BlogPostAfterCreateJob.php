@@ -9,21 +9,26 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 
-class SendMessage implements ShouldQueue
+use Illuminate\Support\Facades\Mail;
+
+
+class BlogPostAfterCreateJob implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
-    // class instance by Job 
-    protected $message; 
-    
+    /**
+     * @var BlogPost 
+     */
+    private $msg;
+
     /**
      * Create a new job instance.
      *
      * @return void
      */
-    public function __constructor($data)
+    public function __construct($msg)
     {
-        $this->message = $data;
+        $this->msg = $msg;
     }
 
     /**
@@ -33,6 +38,13 @@ class SendMessage implements ShouldQueue
      */
     public function handle()
     {
-        info($this->message);
+        
+        Mail::to('functionnel.com@gmail.com')->send($this->msg);
+        logs()->info($this->msg);
+
+        
+        
+        
+        // logs()->info("Contact form message initiated: [{$this->msg}]");
     }
 }
