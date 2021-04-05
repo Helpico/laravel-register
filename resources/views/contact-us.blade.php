@@ -7,38 +7,33 @@
         <link rel="stylesheet" href="{{ mix('css/app.css') }}">
     </head>
     <body class="antialiased">
-    <div class=" min-h-screen bg-gradient-to-r from-blue-400 to-purple-500 flex items-center justify-center">
+    <div class="min-h-screen bg-gradient-to-r from-blue-400 to-purple-500 flex items-center justify-center">
 <!-- Login form -->
-<div class="bg-white p-16 shadow-2xl w-1/2">
-<h1 class="text-3xl font-bold mb-10 text-gray-600">Send us a message!</h1>
+<div class="bg-gray-100 p-16 shadow-2xl w-1/2">
+<h1 class="text-3xl font-bold mb-2 text-gray-500">Ждем от Вас сообщений!</h1>
+
 
 @if(Session::has('message_sent'))
 	<div class="text-green-500 font-bold">
 	   {{Session::get('message_sent')}}
-@elseif(Session::has('message_not_sent'))
-    <div class="text-red-500 fond-bold">
-        {{Session::get('message_not_sent')}}
 @endif
-
-
-
 
 <form class="space-y-4 " method="POST" action="{{ route('contact.send') }}" enctype="multipart/form-data">
 		@csrf
 
 <div>
 <lable class="block mb-2 font-bold text-gray-500" for="first_name">Имя</lable>
-<input type="text" name="first_name" class="outline-none focus:border-purple-500 w-full border-2 border-gray-400 p-2">
+<input type="text" name="first_name" class="outline-none focus:border-purple-500 w-full border border-gray-400 p-2">
 </div>
 
 <div>
 <lable class="block mb-2 font-bold text-gray-500" for="email">Email</lable>
-<input type="text" name="email" class="outline-none focus:border-purple-500  w-full border-2 border-gray-400 p-2">
+<input type="text" name="email" class="outline-none focus:border-purple-500  w-full border border-gray-400 p-2">
 </div>
 
 <div>
 <lable class="block mb-2 font-bold text-gray-500" for="msg">Сообщение</lable>
-<textarea name="msg" class="outline-none focus:border-purple-500 w-full border-2 border-gray-400 p-2" cols="30" rows="10"></textarea>
+<textarea name="msg" class="outline-none focus:border-purple-500 w-full border border-gray-400 p-2" cols="30" rows="2"></textarea>
 </div>
 
 <div class="flex items-center">
@@ -48,7 +43,7 @@
 
 <button type="sumbit" class=" bg-blue-400
  hover:bg-blue-500 transition duration-300 w-full text-white 
- font-bold p-4 shadow-md">Send a message</button>
+ font-bold p-4 shadow-md">Отправить сообщение</button>
 
 </form>
 

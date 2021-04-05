@@ -1,10 +1,96 @@
 ﻿
+
+
 	--------------------
-	QUEUES CREATING
+	QUEUES CREATING		Youtube: laravel очереди учимся использовать и что это такое со 3:35
 	-------------------
 
-php artisan queue: table
-	creating table in DB form queues
+
+
+- Connect to DB in your .env file
+
+- php artisan queue: table
+		creating table in DB form queues
+
+- php artisan migrate 
+
+- Find and choose the type of connection: database or redis
+  There are some connection's drivers, set in config/queue.php.
+	Choose one, namely, 'database' and define it in .env file's: 
+	  .env:
+
+		QUEUE_CONNECTION=database
+
+
+
+- php artisan config:cache  (when in production)
+		To discard cache in configuration
+
+- CREATING A JOB
+
+- Создаем класс в каталоге app\jobs . Этот класс реализует интерфейс очереди.
+	
+		php artisan make:job SendMessage
+
+- В конструктор класса можем передать данные для обработки, напр.: имейл, пользовател и т.д.
+
+- B mетод handle будем выполнять то задание, которе мы ему напишем.
+
+- Создаем член класса, как название переменной protected $message;
+
+- В конструктор класса записываем __constructor9($data) {
+		$this->message = $data;
+}
+
+- Для демонстрации выполнения задания в handle помещаем info($this->message) 
+
+- Далее запускаем задание. Это можно сделать и запуск маршрута App\Jobs\TestMessage::dispatch('Test Message');
+  Аргументы, переданные методу отправки, будут переданы в конструктор задания (у нас это - $data)
+
+- Запускаем сервер разработки 
+	php artisan serve
+
+- php artisan queue:work
+	Как запустить обработчик очереди
+
+
+- Открываем лог Ларавел и видим сообщение, кторое мы передали.
+
+- Октрываем консоль и видим, что задание запущено  и выполнено.
+
+- Смотрим, как выглядит  наше задание в базе (оно там сериализуется в строку).
+
+- Добавим для примера задержку выполнения задания на 10 минут.
+   ....::dispatch('Test Message')->delay(now()->addMinutes(10));
+
+- Чтобы прекратить задание, которое в середине цепочки, мы будем в классе этого задания в методе 
+handle иммулировать исключение: 
+	throw new \Exception('Our Error', 101);
+
+СОЗДАЕМ КАСКАД ЗАДАНИЙ
+
+- Добавим дополнительно к предыдущему еще два задания (названия должны быть конкретными):
+	php artisan make:job PrepareJob
+	php artisan make:job ProcessJob 
+
+- Заходим в созданные под эти задания классы и прописываем параметры по аналогии.
+
+- Переходим в маршртут и добавляем метод, который в качестве параметров принимает массив событий.
+		App\Jobs\SendMessage::withChain([
+			new App\Jobs\PrepareJob('Prepared...'),
+			new App\Jobs\ProcessJob('Processed...')
+		])->dispatch('Start Job');
+
+- Запускаем сервер разработки и обработчик очереди:
+		php artisan serve
+		php artisan queue:work
+
+- Открываем корневой маршрут и проверяем последовательность.
+
+- Запускаем выполнение очереди:
+		php artisan queue:work --tries=3
+
+		$public $tries = 3; // Ограничение попыток в коде
 
 
 
@@ -18,6 +104,80 @@ php artisan queue: table
 
 
 
+
+
+
+
+
+
+
+
+
+-------------
+CONNECT TO MySQL DATABASE
+--------------
+
+- set general coding charset in PHPmyadmin as 'utf8_general_ci'
+
+- How to create a database from console
+	CREATE DATABASE `mova02_register` CHARACTER SET utf8 COLLATE utf8_general_ci
+
+- in config/database.php set this:
+'mysql' => [
+            'driver' => 'mysql',
+            'url' => env('DATABASE_URL'),
+            'host' => env('DB_HOST', '127.0.0.1'),
+            'port' => env('DB_PORT', '3306'),
+            'database' => env('DB_DATABASE', 'mova02_register'),
+            'username' => env('DB_USERNAME', 'root'),
+            'password' => env('DB_PASSWORD', ''),
+            'unix_socket' => env('DB_SOCKET', ''),
+            'charset' => 'utf8',
+            'collation' => 'utf8_general_ci',
+            'prefix' => '',
+            'prefix_indexes' => true,
+            'strict' => true,
+            'engine' => null,
+            'options' => extension_loaded('pdo_mysql') ? array_filter([
+                PDO::MYSQL_ATTR_SSL_CA => env('MYSQL_ATTR_SSL_CA'),
+            ]) : [],
+        ],
+
+
+- php artisan key:generate
+
+- php artisan cache:clear
+что б не выдавало ошибку "Illuminate\Database\QueryException" после php artisan migrate
+
+- Add this to the top of AppServiceProvider.php file
+	use Illuminate\Support\Facades\Schema;
+
+- Add this to 'boot' function inside AppServiceProvider.php
+	Schema::defaultStringLength(191);
+
+- Uncomment this line in DatabaseSeeder.php:
+	\App\Models\User::factory(10)->create();
+
+- Run php artisan db:seed to run seeder of users set by default.
+
+- Run php artisan serve
+
+
+
+
+
+
+
+
+
+
+
+
+
+----
+cool article on cache commands
+https://dev.to/kenfai/laravel-artisan-cache-commands-explained-41e1#:~:text=%24%20php%20artisan%20cache%3Aclear%20Application,()%3B%20Facade%20method%20via%20code.
+----
 
 
 
@@ -286,7 +446,7 @@ Add this to the top of AppServiceProvider.php file
 use Illuminate\Support\Facades\Schema;
 
 Add this to 'boot' function inside AppServiceProvider.php
-'Schema::defaultStringLength(191);' 
+Schema::defaultStringLength(191);
 
 Run php artisan migrate
 Run php artisan db:seed to run seeders, if any.

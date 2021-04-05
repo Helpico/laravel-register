@@ -7,9 +7,12 @@
   <title>Document</title>
 </head>
 <body>
-  <h1>Contact Message</h1>
-  <p>Name : {{$details['first_name']}}</p>
-  <p>Email : {{$details['email']}}</p>
-  <p>Message : {{$details['msg']}}</p>
+  <h1>Сообщение от клиента</h1>
+  <p>Имя клиента: {{$details['first_name']}}</p>
+  <p>Email клиента: {{$details['email']}}</p>
+  <p>Сообщение: {{$details['msg']}}</p>
+  <p>Быстро ответить: {{ $details['asap'] == 'on' ? 'Да, нужен быстрый ответ' : 'No, take your time!' }}</p>
 </body>
 </html>
+
+

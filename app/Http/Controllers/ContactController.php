@@ -30,7 +30,8 @@ class ContactController extends Controller
         $details = [
             'first_name' => $request->first_name,
             'email' => $request->email,
-            'msg' => $request->msg
+            'msg' => $request->msg,
+            'asap' => $request->asap
         ];
 
       
@@ -38,8 +39,7 @@ class ContactController extends Controller
 
         Mail::to('functionnel.com@gmail.com')->send(new ContactMail($details));
         
-        return redirect()->route('contact.create')
-            ->with('message_sent', 'Thanks for contacting us!');
+        return redirect()->route('contact.create')->with('message_sent', 'Your message has been sent successfully!');
         
     }
          

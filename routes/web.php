@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ContactController;
 
+
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -13,8 +14,11 @@ use App\Http\Controllers\ContactController;
 | contains the "web" middleware group. Now create something great!
 |
 */
+// Queue's job testing
+Route::get('/', function() {
+  App\Jobs\SendMessage::dispatch('Test Message');
+});
 
-Route::redirect('/', '/contact-us');
 
 Route::get('/contact-us', [ContactController::class, 'contact'])->name('contact.create');
 Route::post('/send-message', [ContactController::class, 'sendEmail'])->name('contact.send');
